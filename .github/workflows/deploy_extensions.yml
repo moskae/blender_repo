@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Скачиваем и настраиваем Blender через официальный экшен
-      - name: Set up Blender
-        uses: nmarulo/setup-blender@v1
-        with:
-          blender-version: '4.2.0'
+      # Устанавливаем официальный стабильный Blender через встроенный в систему snap
+      - name: Install Blender
+        run: |
+          sudo snap install blender --classic
+          blender --version
 
       # Генерируем index.json и веб-страницу index.html
       - name: Generate Extension Index
