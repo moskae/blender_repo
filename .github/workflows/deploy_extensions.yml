@@ -18,36 +18,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Чистая установка стабильной версии Blender
+      # 1. Установка стабильной версии Blender
       - name: Install Blender
         run: |
           sudo snap install blender --classic
 
-      # 2. Генерируем дефолтный индекс (Blender запишет туда пути без папки extensions)
+      # 2. Генерируем дефолтный индекс
       - name: Generate Extension Index
         run: |
           blender --command extension server-generate --repo-dir=. --html
 
-      # 3. ХАК ПУТЕЙ: Автоматически заменяем пути к архивам в index.json, добавляя им префикс extensions/
-      # Команда находит строку "archive_url": "имя.zip" и превращает в "archive_url": "extensions/имя.zip"
+      # 3. Автоматически добавляем префикс extensions/ ко всем архивам в index.json
       - name: Fix Asset Paths for Blender
         run: |
           sed -i 's/"archive_url": "/&extensions\//g' index.json
-          # Проверим в логах сборки, что пути изменились корректно
           cat index.json
 
-      # 4. Подключаем ваши CSS/JS стили, чтобы страница не выглядела плохо
+      # 4. Подключаем CSS/JS стили
       - name: Inject Custom Styles and Scripts
         run: |
           sed -i 's|</head>|<link rel="stylesheet" href="assets/style.css"></head>|g' index.html
           sed -i 's|</body>|<script src="assets/script.js"></script></body>|g' index.html
 
-      # 5. Публикуем результат в GitHub Pages
+      # 5. Подготовка архива артефакта для деплоя
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
+      # 6. Публикация в GitHub Pages (исправленный шаг)
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages-artifact@v4
         uses: actions/deploy-pages@v4
