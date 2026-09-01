@@ -27,7 +27,7 @@ jobs:
       # Генерируем index.json и веб-страницу index.html
       - name: Generate Extension Index
         run: |
-          blender --command extension server-generate --repo-dir=./extensions --html
+          blender --command extension server-generate --repo-dir=. --html
 
       # Подготавливаем файлы для деплоя
       - name: Upload Artifact
