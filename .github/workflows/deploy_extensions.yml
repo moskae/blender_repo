@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate Extension Index
         run: |
-          blender --command extension server-generate --repo-dir=./extensions --html
+          blender --command extension server-generate --repo-dir=. --sub-dir=extensions --html
 
       # НОВЫЙ ШАГ: Внедряем наш кастомный дизайн в сгенерированный index.html
       - name: Inject Custom Styles and Scripts
