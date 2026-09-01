@@ -18,38 +18,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Чистая установка стабильной версии Blender
+      # 1. Простая установка стабильной версии Blender
       - name: Install Blender
         run: |
           sudo snap install blender --classic
 
-      # 2. Создаем чистую структуру для публикации в папке public_site
-      - name: Prepare Static Repository Structure
-        run: |
-          mkdir -p public_site/extensions
-          cp -r extensions/* public_site/extensions/ 2>/dev/null || true
-          if [ -d "assets" ]; then cp -r assets public_site/; fi
-
-      # 3. Нативная генерация: Blender сканирует public_site, видит вложенную
-      # папку extensions и САМ пишет в index.json правильные пути "extensions/vehicle_tools.zip"
+      # 2. Генерируем дефолтный индекс прямо в корне (как в самый первый рабочий раз)
       - name: Generate Extension Index
         run: |
-          blender --command extension server-generate --repo-dir=public_site --html
+          blender --command extension server-generate --repo-dir=. --html
 
-      # 4. Подключаем CSS/JS стили к сгенерированному файлу (если папка assets существует)
-      - name: Inject Custom Styles and Scripts
+      # 3. Безопасное исправление путей в index.json (решаем проблему 404 в Blender)
+      # Команда заменит "archive_url": "vehicle_tools.zip" на "archive_url": "extensions/vehicle_tools.zip"
+      - name: Fix Asset Paths for Blender
         run: |
-          if [ -d "public_site/assets" ]; then
-            sed -i 's|</head>|<link rel="stylesheet" href="assets/style.css"></head>|g' public_site/index.html
-            sed -i 's|</body>|<script src="assets/script.js"></script></body>|g' public_site/index.html
-          fi
+          sed -i 's/"archive_url": "v/"archive_url": "extensions\/v/g' index.json
+          cat index.json
 
-      # 5. Публикуем готовую собранную папку public_site в GitHub Pages
+      # 4. Публикуем корень репозитория напрямую в GitHub Pages
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'public_site'
+          path: '.'
 
-      # 6. Деплой сайта
+      # 5. Деплой сайта
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
