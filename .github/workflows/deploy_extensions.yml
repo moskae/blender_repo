@@ -18,23 +18,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Устанавливаем официальный стабильный Blender через встроенный в систему snap
       - name: Install Blender
         run: |
           sudo snap install blender --classic
-          blender --version
 
-      # Генерируем index.json и веб-страницу index.html
       - name: Generate Extension Index
         run: |
-          blender --command extension server-generate --repo-dir=./extensions --html --html
+          blender --command extension server-generate --repo-dir=./extensions --html
 
-      # Подготавливаем файлы для деплоя
+      # НОВЫЙ ШАГ: Внедряем наш кастомный дизайн в сгенерированный index.html
+      - name: Inject Custom Styles and Scripts
+        run: |
+          # Вставляем подключение style.css перед закрывающим тегом </head>
+          sed -i 's|</head>|<link rel="stylesheet" href="assets/style.css"></head>|g' index.html
+
+          # Вставляем подключение script.js перед закрывающим тегом </body>
+          sed -i 's|</body>|<script src="assets/script.js"></script></body>|g' index.html
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
-      # Публикуем сайт в GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
