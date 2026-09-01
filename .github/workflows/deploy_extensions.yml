@@ -3,8 +3,8 @@ name: Generate and Deploy Blender Extensions
 on:
   push:
     branches:
-      - master # Триггер запуска при любом push в ветку master
-  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой
+      - master
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,24 +18,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Скачиваем официальную актуальную версию Blender для Linux
+      # Скачиваем и настраиваем Blender через официальный экшен
       - name: Set up Blender
-        run: |
-          wget https://blender.org
-          tar -xf blender-4.2.0-linux-x64.tar.xz
-          echo "$GITHUB_WORKSPACE/blender-4.2.0-linux-x64" >> $GITHUB_PATH
+        uses: nmarulo/setup-blender@v1
+        with:
+          blender-version: '4.2.0'
 
-      # 2. Генерируем index.json и веб-страницу index.html средствами Blender
+      # Генерируем index.json и веб-страницу index.html
       - name: Generate Extension Index
         run: |
           blender --command extension server-generate --repo-dir=. --html
 
-      # 3. Подготавливаем файлы для деплоя в GitHub Pages
+      # Подготавливаем файлы для деплоя
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
-      # 4. Публикуем сайт напрямую в Pages (минуя ручные пуши в ветку)
+      # Публикуем сайт в GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
