@@ -1,6 +1,4 @@
 #build source ignore
 __init__.py
 blender_manifest.toml
-#local indexes
-index.json
-index.html
+.gitignore
